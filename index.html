@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -49,11 +49,13 @@ a{color:inherit}
 :focus-visible{outline:2px solid var(--brand-2);outline-offset:2px;border-radius:8px}
 .tnum{font-variant-numeric:tabular-nums}
 
-/* header */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;
-  background:color-mix(in srgb,var(--surface) 88%,transparent);
-  backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)}
-.top-in{max-width:1180px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
+/* sticky top: header + toolbar + filters, auto-hides on scroll down */
+#stickytop{position:sticky;top:0;z-index:40;padding-top:env(safe-area-inset-top,0px);
+  background:color-mix(in srgb,var(--surface) 92%,transparent);
+  backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line);
+  transition:transform .28s cubic-bezier(.4,0,.2,1)}
+#stickytop.hide{transform:translateY(-100%)}
+.top-in{max-width:1180px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:12px}
 .brand{display:flex;align-items:center;gap:11px;font-family:var(--display);font-weight:800;font-size:17px;letter-spacing:-.2px}
 .logo{width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;
   background:linear-gradient(150deg,var(--brand-2),var(--brand));color:#fff;box-shadow:var(--shadow)}
@@ -85,27 +87,43 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;
 .stat b{display:block;font-family:var(--display);font-weight:800;font-size:23px;letter-spacing:-.5px;color:var(--brand)}
 .stat span{font-size:12.5px;color:var(--muted);font-weight:500}
 
-/* search + filters */
-.controls{max-width:1180px;margin:22px auto 0;padding:0 20px;position:sticky;
-  top:calc(env(safe-area-inset-top,0px) + 64px);z-index:30}
-.searchwrap{position:relative;display:flex;align-items:center}
-.searchwrap svg.si{position:absolute;inset-inline-start:16px;width:20px;height:20px;color:var(--faint);pointer-events:none}
-#q{width:100%;height:56px;border-radius:15px;border:1px solid var(--line);background:var(--surface);
-  color:var(--ink);font-family:inherit;font-size:16px;font-weight:500;
-  padding-inline-start:48px;padding-inline-end:48px;box-shadow:var(--shadow-lg);transition:.16s}
-#q:focus{outline:none;border-color:var(--brand-2);box-shadow:0 0 0 4px var(--ring),var(--shadow-lg)}
-#clearq{position:absolute;inset-inline-end:12px;width:30px;height:30px;border-radius:9px;border:none;
+/* toolbar: compact search + filters button */
+.toolbar{max-width:1180px;margin:0 auto;padding:0 20px 12px;display:flex;gap:10px;align-items:center}
+.searchwrap{position:relative;display:flex;align-items:center;flex:1;min-width:0}
+.searchwrap svg.si{position:absolute;inset-inline-start:15px;width:19px;height:19px;color:var(--faint);pointer-events:none}
+#q{width:100%;height:46px;border-radius:13px;border:1px solid var(--line);background:var(--surface);
+  color:var(--ink);font-family:inherit;font-size:15px;font-weight:500;
+  padding-inline-start:44px;padding-inline-end:42px;box-shadow:var(--shadow);transition:.16s}
+#q:focus{outline:none;border-color:var(--brand-2);box-shadow:0 0 0 4px var(--ring),var(--shadow)}
+#clearq{position:absolute;inset-inline-end:10px;width:28px;height:28px;border-radius:8px;border:none;
   background:var(--surface-2);color:var(--muted);display:none;place-items:center}
 #clearq.show{display:grid}
-#clearq svg{width:16px;height:16px}
-
-.filters{background:var(--surface);border:1px solid var(--line);border-radius:15px;margin-top:10px;
-  box-shadow:var(--shadow);overflow:hidden}
-.frow{display:flex;align-items:center;gap:10px;padding:11px 14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+#clearq svg{width:15px;height:15px}
+.fbtn{height:46px;padding:0 15px;border-radius:13px;border:1px solid var(--line);background:var(--surface);
+  color:var(--ink);font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:8px;
+  white-space:nowrap;transition:.16s;box-shadow:var(--shadow);flex:none}
+.fbtn:hover{border-color:var(--brand-2);color:var(--brand)}
+.fbtn.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.fbtn svg{width:18px;height:18px}
+.fbtn b{background:var(--accent);color:#04302c;border-radius:999px;min-width:20px;height:20px;padding:0 5px;
+  display:inline-grid;place-items:center;font-size:12px;font-weight:800;font-family:var(--sans)}
+.fbtn.on b{background:#fff;color:var(--brand)}
+.fbtn .flabeltxt{}
+@media(max-width:460px){.fbtn .flabeltxt{display:none}}
+/* collapsible filters panel */
+.filters{max-width:1180px;margin:0 auto}
+.filters-in{margin:0 20px 12px;background:var(--surface);border:1px solid var(--line);border-radius:15px;
+  box-shadow:var(--shadow-lg);overflow:hidden auto;max-height:min(66vh,540px)}
+.frow{display:flex;align-items:center;gap:10px;padding:12px 14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
 .frow:last-child{border-bottom:none}
-.flabel{font-size:12px;font-weight:700;color:var(--faint);min-width:74px;display:flex;align-items:center;gap:6px}
+.flabel{font-size:12px;font-weight:700;color:var(--faint);min-width:78px;display:flex;align-items:center;gap:6px}
 .flabel svg{width:15px;height:15px}
 .chips{display:flex;gap:7px;flex-wrap:wrap;flex:1}
+.fclear{display:flex;justify-content:flex-end}
+.fclear button{height:36px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);
+  color:var(--muted);font-weight:700;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.fclear button:hover{border-color:var(--brand-2);color:var(--brand)}
+.fclear button svg{width:15px;height:15px}
 .chip{border:1px solid var(--line);background:var(--surface-2);color:var(--muted);border-radius:999px;
   padding:6px 13px;font-size:13px;font-weight:600;transition:.14s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .chip:hover{border-color:var(--brand-2);color:var(--brand)}
@@ -113,11 +131,12 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;
 .chip .ct{font-size:11px;font-weight:700;opacity:.7}
 .chip.on .ct{opacity:.85}
 .chip .dot{width:9px;height:9px;border-radius:50%}
-select.gov{appearance:none;flex:1;min-width:160px;height:38px;border-radius:11px;border:1px solid var(--line);
+select.sel{appearance:none;flex:1;min-width:150px;height:40px;border-radius:11px;border:1px solid var(--line);
   background:var(--surface-2);color:var(--ink);font-family:inherit;font-weight:600;font-size:13.5px;padding:0 34px 0 13px;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235f7688' stroke-width='2.4'><path d='M6 9l6 6 6-6'/></svg>");
   background-repeat:no-repeat;background-position:left 12px center;background-size:15px}
-[dir="ltr"] select.gov{padding:0 13px 0 34px;background-position:right 12px center}
+[dir="ltr"] select.sel{padding:0 13px 0 34px;background-position:right 12px center}
+select.sel:disabled{opacity:.5;cursor:not-allowed}
 
 /* results */
 .results{max-width:1180px;margin:0 auto;padding:16px 20px 60px}
@@ -237,46 +256,61 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 48px}
 <style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
-<header class="top">
-  <div class="top-in">
-    <div class="brand">
-      <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.35-9.5-8.5C.8 9.6 2.3 6 5.5 6 7.4 6 8.7 7 12 10c3.3-3 4.6-4 6.5-4 3.2 0 4.7 3.6 3 6.5C19 16.65 12 21 12 21z"/><path d="M8.5 12.5h2l1-2 1.5 3 1-1h2" /></svg></span>
-      <span data-i18n="brand">Metlife Network<small data-i18n="brand2">شبكة الخدمات الطبية · مصر</small></span>
+<div id="stickytop">
+  <header class="top">
+    <div class="top-in">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.35-9.5-8.5C.8 9.6 2.3 6 5.5 6 7.4 6 8.7 7 12 10c3.3-3 4.6-4 6.5-4 3.2 0 4.7 3.6 3 6.5C19 16.65 12 21 12 21z"/><path d="M8.5 12.5h2l1-2 1.5 3 1-1h2" /></svg></span>
+        <span data-i18n="brand">Metlife Network<small data-i18n="brand2">شبكة الخدمات الطبية · مصر</small></span>
+      </div>
+      <div class="top-sp"></div>
+      <span class="visitpill" id="visitPill" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span id="visitTxt"></span></span>
+      <button class="iconbtn" id="langBtn" aria-label="Language"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg><span id="langTxt">EN</span></button>
+      <button class="iconbtn sq" id="themeBtn" aria-label="Theme"><svg id="themeIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
     </div>
-    <div class="top-sp"></div>
-    <span class="visitpill" id="visitPill" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span id="visitTxt"></span></span>
-    <button class="iconbtn" id="langBtn" aria-label="Language"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg><span id="langTxt">EN</span></button>
-    <button class="iconbtn sq" id="themeBtn" aria-label="Theme"><svg id="themeIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+  </header>
+  <div class="toolbar">
+    <div class="searchwrap">
+      <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="search" autocomplete="off" placeholder="ابحث باسم المكان أو العنوان أو المنطقة…" data-ph-ar="ابحث باسم المكان أو العنوان أو المنطقة…" data-ph-en="Search by name, address or area…">
+      <button id="clearq" aria-label="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <button class="fbtn" id="fbtn" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v5l-4 2v-7z"/></svg><span class="flabeltxt" data-i18n="filters">الفلاتر</span><b id="fcount" hidden>0</b></button>
   </div>
-</header>
+  <div class="filters" id="filters" hidden>
+    <div class="filters-in">
+      <div class="frow">
+        <span class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-i18n="fGov">المحافظة</span></span>
+        <select class="sel" id="govSel"></select>
+      </div>
+      <div class="frow" id="cityRow">
+        <span class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/></svg><span data-i18n="fCity">المدينة/المنطقة</span></span>
+        <select class="sel" id="citySel"></select>
+      </div>
+      <div class="frow">
+        <span class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span data-i18n="fType">النوع</span></span>
+        <div class="chips" id="typeChips"></div>
+      </div>
+      <div class="frow">
+        <span class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span data-i18n="fCard">الكارت</span></span>
+        <div class="chips" id="cardChips"></div>
+      </div>
+      <div class="frow" id="specRow" hidden>
+        <span class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3M16 3v3a2 2 0 0 0 2 2h3M8 21v-3a2 2 0 0 0-2-2H3M16 21v-3a2 2 0 0 1 2-2h3"/></svg><span data-i18n="fSpec">التخصص</span></span>
+        <select class="sel" id="specSel"></select>
+      </div>
+      <div class="frow fclear">
+        <button id="clearFilters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span data-i18n="clearF">مسح كل الفلاتر</span></button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <section class="hero">
   <h1 data-i18n="h1">دليل <span class="hl">شبكة الخدمات الطبية</span> بالكامل</h1>
   <p class="sub" data-i18n="sub">ابحث في كل مقدمي الخدمة المعتمدين لدى تأمين MetLife على مستوى مصر — صيدليات، معامل، مستشفيات، أطباء، أسنان، بصريات وأشعة. مع أرقام الهواتف والعناوين والاتجاهات على الخريطة.</p>
   <div class="stats" id="stats"></div>
 </section>
-
-<div class="controls">
-  <div class="searchwrap">
-    <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-    <input id="q" type="search" autocomplete="off" placeholder="ابحث باسم المكان أو العنوان أو المنطقة…" data-ph-ar="ابحث باسم المكان أو العنوان أو المنطقة…" data-ph-en="Search by name, address or area…">
-    <button id="clearq" aria-label="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-  </div>
-  <div class="filters">
-    <div class="frow">
-      <span class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span data-i18n="fType">النوع</span></span>
-      <div class="chips" id="typeChips"></div>
-    </div>
-    <div class="frow">
-      <span class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span data-i18n="fCard">الكارت</span></span>
-      <div class="chips" id="cardChips"></div>
-    </div>
-    <div class="frow">
-      <span class="flabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-i18n="fGov">المحافظة</span></span>
-      <select class="gov" id="govSel"></select>
-    </div>
-  </div>
-</div>
 
 <section class="results">
   <div id="browse">
@@ -338,7 +372,7 @@ var DATA = (window.MET_DATA)||{meta:{types:[],cards:[],govs:[],total:0},rows:[]}
 var ROWS = DATA.rows, META = DATA.meta;
 
 /* ---------- i18n ---------- */
-var LANG = 'ar';
+var LANG = 'en';
 var T = {
   ar:{brand:'Metlife Network',brand2:'شبكة الخدمات الطبية · مصر',
       h1:['دليل ','شبكة الخدمات الطبية',' بالكامل'],
@@ -354,7 +388,9 @@ var T = {
       visit:function(n){return 'زيارتك رقم '+fmt(n);},
       visits:function(n){return fmt(n)+' زيارة لك';},
       brType:'تصفّح حسب النوع',brGov:'تصفّح حسب المحافظة',
-      page:'صفحة',of:'من',prev:'السابق',next:'التالي'},
+      page:'صفحة',of:'من',prev:'السابق',next:'التالي',
+      filters:'الفلاتر',fCity:'المدينة/المنطقة',fSpec:'التخصص',clearF:'مسح كل الفلاتر',
+      allcity:'كل المدن',allspec:'كل التخصصات'},
   en:{brand:'Metlife Network',brand2:'Medical Provider Network · Egypt',
       h1:['The complete ','medical provider',' directory'],
       sub:'Search every MetLife-approved provider across Egypt — pharmacies, labs, hospitals, physicians, dental, optics and radiology. With phone numbers, addresses and map directions.',
@@ -369,7 +405,9 @@ var T = {
       visit:function(n){return 'Your visit #'+fmt(n);},
       visits:function(n){return fmt(n)+' of your visits';},
       brType:'Browse by type',brGov:'Browse by governorate',
-      page:'Page',of:'of',prev:'Prev',next:'Next'}
+      page:'Page',of:'of',prev:'Prev',next:'Next',
+      filters:'Filters',fCity:'City / Area',fSpec:'Specialty',clearF:'Clear all filters',
+      allcity:'All cities',allspec:'All specialties'}
 };
 function fmt(n){return (LANG==='ar')?n.toLocaleString('ar-EG'):n.toLocaleString('en-US');}
 
@@ -390,9 +428,20 @@ function icon(te){return ICONS[te]||ICONS.Hospital;}
 var TIER = {Orange:'--orange',Gold:'--gold',Silver:'--silver',Green:'--green'};
 
 /* ---------- state ---------- */
-var state={q:'',type:'',card:'',gov:''};
+var state={q:'',type:'',card:'',gov:'',city:'',spec:''};
 var PER=24, page=1, filtered=[];
-function isBrowsing(){ return !(state.q||state.type||state.card||state.gov); }
+function isBrowsing(){ return !(state.q||state.type||state.card||state.gov||state.city||state.spec); }
+function activeCount(){ return ['type','card','gov','city','spec'].filter(function(k){return state[k];}).length + (state.q?1:0); }
+var QS=[];
+function matches(r, exclude){
+  if(exclude!=='type' && state.type && r.te!==state.type)return false;
+  if(exclude!=='card' && state.card && r.ke!==state.card)return false;
+  if(exclude!=='gov'  && state.gov  && r.ge!==state.gov)return false;
+  if(exclude!=='city' && state.city && r.ce!==state.city)return false;
+  if(exclude!=='spec' && state.spec && r.se!==state.spec)return false;
+  if(exclude!=='q'    && QS.length){ for(var i=0;i<QS.length;i++){ if(r._s.indexOf(QS[i])<0)return false; } }
+  return true;
+}
 
 /* ---------- normalize for search ---------- */
 function norm(s){
@@ -431,10 +480,52 @@ function buildGov(){
   var html='<option value="">'+t.allgov+'</option>';
   META.govs.forEach(function(g){
     var lbl=(LANG==='ar')?g.a:g.e;
-    html+='<option value="'+g.e+'"'+(state.gov===g.e?' selected':'')+'>'+lbl+' ('+fmt(g.n)+')</option>';
+    html+='<option value="'+esc(g.e)+'"'+(state.gov===g.e?' selected':'')+'>'+esc(lbl)+' ('+fmt(g.n)+')</option>';
   });
   sel.innerHTML=html;
   sel.value=state.gov;
+}
+// distinct helper: [{e,a,n}] from rows matching all filters except `exclude`
+function facet(field_e, field_a, exclude){
+  var m={}, order=[];
+  ROWS.forEach(function(r){
+    if(!matches(r,exclude))return;
+    var e=r[field_e]; if(!e)return;
+    if(!m[e]){ m[e]={e:e,a:r[field_a]||e,n:0}; order.push(e); }
+    m[e].n++;
+  });
+  return order.map(function(e){return m[e];}).sort(function(x,y){return y.n-x.n;});
+}
+function buildCity(){
+  var t=T[LANG], sel=document.getElementById('citySel');
+  var opts=facet('ce','ca','city');
+  // keep current selection valid
+  if(state.city && !opts.some(function(o){return o.e===state.city;})) state.city='';
+  var html='<option value="">'+t.allcity+'</option>';
+  opts.forEach(function(o){
+    var lbl=(LANG==='ar')?o.a:o.e;
+    html+='<option value="'+esc(o.e)+'"'+(state.city===o.e?' selected':'')+'>'+esc(lbl)+' ('+fmt(o.n)+')</option>';
+  });
+  sel.innerHTML=html; sel.value=state.city;
+}
+function buildSpec(){
+  var t=T[LANG], sel=document.getElementById('specSel'), row=document.getElementById('specRow');
+  var opts=facet('se','sa','spec');
+  if(state.spec && !opts.some(function(o){return o.e===state.spec;})) state.spec='';
+  // show specialty filter only when the current set actually has specialties
+  if(opts.length<1){ row.hidden=true; sel.innerHTML='<option value="">'+t.allspec+'</option>'; return; }
+  row.hidden=false;
+  var html='<option value="">'+t.allspec+'</option>';
+  opts.forEach(function(o){
+    var lbl=(LANG==='ar')?o.a:o.e;
+    html+='<option value="'+esc(o.e)+'"'+(state.spec===o.e?' selected':'')+'>'+esc(lbl)+' ('+fmt(o.n)+')</option>';
+  });
+  sel.innerHTML=html; sel.value=state.spec;
+}
+function updateFcount(){
+  var n=activeCount(), b=document.getElementById('fcount');
+  if(n>0){ b.hidden=false; b.textContent=fmt(n); document.getElementById('fbtn').classList.add('has'); }
+  else{ b.hidden=true; document.getElementById('fbtn').classList.remove('has'); }
 }
 
 /* ---------- stats ---------- */
@@ -455,14 +546,10 @@ function buildStats(){
 /* ---------- filtering ---------- */
 function apply(){
   var q=norm(state.q.trim());
-  var qs = q?q.split(/\s+/):[];
-  filtered = ROWS.filter(function(r){
-    if(state.type && r.te!==state.type)return false;
-    if(state.card && r.ke!==state.card)return false;
-    if(state.gov && r.ge!==state.gov)return false;
-    if(qs.length){ for(var i=0;i<qs.length;i++){ if(r._s.indexOf(qs[i])<0)return false; } }
-    return true;
-  });
+  QS = q?q.split(/\s+/):[];
+  buildCity(); buildSpec();               // prune + rebuild dependent facets
+  filtered = ROWS.filter(function(r){ return matches(r,null); });
+  updateFcount();
   page=1;
   var t=T[LANG];
   var browsing=isBrowsing();
@@ -542,8 +629,12 @@ function cardHTML(r){
   var tierName=(LANG==='ar')?(r.ka||r.ke):(r.ke||r.ka);
   var tvar=TIER[r.ke]; var tierDot=tvar?'<span class="dot" style="background:var('+tvar+')"></span>':'';
   var loc=[city,gov].filter(Boolean).join('، ');
-  // directions query (prefer english address for geo accuracy)
-  var dq=encodeURIComponent([r.ne||r.na, r.ae||r.aa, r.ce||r.ca, (r.ge||r.ga), 'Egypt'].filter(Boolean).join(', '));
+  // directions: query by place NAME + area + governorate (Google resolves named
+  // places far more reliably than raw/garbled street text). English preferred.
+  var parts=[r.ne||r.na, r.ce||r.ca, r.ge||r.ga, 'Egypt'];
+  var seen={}, dparts=[];
+  parts.forEach(function(x){ x=(x||'').trim(); if(x && !seen[x]){ seen[x]=1; dparts.push(x); } });
+  var dq=encodeURIComponent(dparts.join(', '));
   var dir='https://www.google.com/maps/dir/?api=1&destination='+dq;
   var phones=(r.p||[]).map(function(p){
     var digits=p.replace(/[^\d+]/g,'');
@@ -605,13 +696,26 @@ qEl.addEventListener('input',function(){
   clearTimeout(tmr); tmr=setTimeout(function(){ state.q=qEl.value; apply(); },160);
 });
 clr.onclick=function(){ qEl.value='';state.q='';clr.classList.remove('show');apply();qEl.focus(); };
-document.getElementById('govSel').onchange=function(){ state.gov=this.value; apply(); };
-document.getElementById('resetBtn').onclick=function(){
-  state={q:'',type:'',card:'',gov:''}; qEl.value=''; clr.classList.remove('show');
+document.getElementById('govSel').onchange=function(){ state.gov=this.value; state.city=''; apply(); };
+document.getElementById('citySel').onchange=function(){ state.city=this.value; apply(); };
+document.getElementById('specSel').onchange=function(){ state.spec=this.value; apply(); };
+
+/* filters panel toggle */
+var fbtn=document.getElementById('fbtn'), fpanel=document.getElementById('filters');
+function openFilters(){ fpanel.hidden=false; fbtn.classList.add('on'); fbtn.setAttribute('aria-expanded','true'); }
+function closeFilters(){ fpanel.hidden=true; fbtn.classList.remove('on'); fbtn.setAttribute('aria-expanded','false'); }
+fbtn.onclick=function(){ if(fpanel.hidden) openFilters(); else closeFilters(); };
+document.getElementById('clearFilters').onclick=function(){
+  state={q:state.q,type:'',card:'',gov:'',city:'',spec:''};
+  rebuildChipsActive(); apply();
+};
+function resetAll(){
+  state={q:'',type:'',card:'',gov:'',city:'',spec:''}; qEl.value=''; clr.classList.remove('show');
   buildChips(document.getElementById('typeChips'),META.types,'type',false);
   buildChips(document.getElementById('cardChips'),META.cards,'card',true);
-  buildGov(); apply();
-};
+  buildGov(); closeFilters(); apply();
+}
+document.getElementById('resetBtn').onclick=resetAll;
 
 /* ---------- language ---------- */
 function applyLang(){
@@ -628,6 +732,10 @@ function applyLang(){
   document.querySelector('[data-i18n="fType"]').textContent=t.fType;
   document.querySelector('[data-i18n="fCard"]').textContent=t.fCard;
   document.querySelector('[data-i18n="fGov"]').textContent=t.fGov;
+  document.querySelector('[data-i18n="fCity"]').textContent=t.fCity;
+  document.querySelector('[data-i18n="fSpec"]').textContent=t.fSpec;
+  document.querySelector('[data-i18n="filters"]').textContent=t.filters;
+  document.querySelector('[data-i18n="clearF"]').textContent=t.clearF;
   document.querySelector('[data-i18n="reset"]').textContent=t.reset;
   qEl.setAttribute('placeholder', LANG==='ar'?qEl.getAttribute('data-ph-ar'):qEl.getAttribute('data-ph-en'));
   document.querySelector('[data-i18n="foot1"]').textContent = LANG==='ar'
@@ -705,6 +813,15 @@ function renderVisits(){
   loadVisits();
   applyLang();
   updThemeIco();
+  // auto-hide sticky top when scrolling down, reveal when scrolling up
+  var stEl=document.getElementById('stickytop'), lastY=window.pageYOffset||0, ticking=false;
+  function onScroll(){
+    var y=window.pageYOffset||document.documentElement.scrollTop||0;
+    if(y>lastY+6 && y>150){ stEl.classList.add('hide'); if(!fpanel.hidden) closeFilters(); }
+    else if(y<lastY-6 || y<150){ stEl.classList.remove('hide'); }
+    lastY=y; ticking=false;
+  }
+  window.addEventListener('scroll',function(){ if(!ticking){ ticking=true; requestAnimationFrame(onScroll); } },{passive:true});
 })();
 })();
 </script>
