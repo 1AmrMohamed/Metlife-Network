@@ -629,13 +629,14 @@ function cardHTML(r){
   var tierName=(LANG==='ar')?(r.ka||r.ke):(r.ke||r.ka);
   var tvar=TIER[r.ke]; var tierDot=tvar?'<span class="dot" style="background:var('+tvar+')"></span>':'';
   var loc=[city,gov].filter(Boolean).join('، ');
-  // directions: query by place NAME + area + governorate (Google resolves named
-  // places far more reliably than raw/garbled street text). English preferred.
-  var parts=[r.ne||r.na, r.ce||r.ca, r.ge||r.ga, 'Egypt'];
+  // Build the FULL place string: name + street address + area/district + city + governorate + country,
+  // then let Google Maps search for that complete name — most reliable way to land on the exact place.
+  // Arabic fields preferred (local Egyptian listings/addresses resolve better in Arabic).
+  var parts=[ r.na||r.ne, r.aa||r.ae, r.ca||r.ce, r.ga||r.ge, 'مصر' ];
   var seen={}, dparts=[];
-  parts.forEach(function(x){ x=(x||'').trim(); if(x && !seen[x]){ seen[x]=1; dparts.push(x); } });
-  var dq=encodeURIComponent(dparts.join(', '));
-  var dir='https://www.google.com/maps/dir/?api=1&destination='+dq;
+  parts.forEach(function(x){ x=(''+(x||'')).replace(/\s+/g,' ').trim(); if(x && !seen[x]){ seen[x]=1; dparts.push(x); } });
+  var dq=encodeURIComponent(dparts.join('، '));
+  var dir='https://www.google.com/maps/search/?api=1&query='+dq;
   var phones=(r.p||[]).map(function(p){
     var digits=p.replace(/[^\d+]/g,'');
     return '<div class="ph"><a class="tel" href="tel:'+digits+'" aria-label="'+t.call+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2H7a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7A2 2 0 0 1 22 16.9z"/></svg></a>'+
@@ -705,6 +706,12 @@ var fbtn=document.getElementById('fbtn'), fpanel=document.getElementById('filter
 function openFilters(){ fpanel.hidden=false; fbtn.classList.add('on'); fbtn.setAttribute('aria-expanded','true'); }
 function closeFilters(){ fpanel.hidden=true; fbtn.classList.remove('on'); fbtn.setAttribute('aria-expanded','false'); }
 fbtn.onclick=function(){ if(fpanel.hidden) openFilters(); else closeFilters(); };
+/* close the filters panel when clicking anywhere outside it */
+document.addEventListener('click',function(e){
+  if(fpanel.hidden)return;
+  if(e.target.closest('#filters')||e.target.closest('#fbtn'))return;
+  closeFilters();
+});
 document.getElementById('clearFilters').onclick=function(){
   state={q:state.q,type:'',card:'',gov:'',city:'',spec:''};
   rebuildChipsActive(); apply();
