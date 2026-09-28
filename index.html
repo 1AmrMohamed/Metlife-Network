@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -185,6 +185,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .empty h3{font-size:1.2rem;color:var(--ink);font-weight:800;margin-bottom:6px}
 .loadmore{display:block;margin:26px auto 0;background:var(--card);border:1.5px solid var(--brand);color:var(--brand);font-weight:800;padding:12px 30px;border-radius:12px;transition:.2s}
 .loadmore:hover{background:var(--brand);color:#fff}
+/* pagination */
+.pager{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin:34px auto 0}
+.pager button{min-width:40px;height:40px;padding:0 12px;border-radius:11px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-weight:800;font-size:.88rem;transition:.16s}
+.pager button:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
+.pager button.on{background:linear-gradient(135deg,var(--brand),var(--brand-2));border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(0,144,218,.35)}
+.pager button:disabled{opacity:.4;cursor:not-allowed}
+.pager .dots{color:var(--muted);font-weight:800;padding:0 4px;align-self:end}
+.pager .nav svg{width:16px;height:16px}
+.rinfo{font-size:.82rem;color:var(--muted);font-weight:600;text-align:center;margin-top:12px}
 
 /* footer */
 footer{background:var(--navy);color:#bcdcf2;padding:40px 24px 30px;font-size:.85rem}
@@ -274,7 +283,8 @@ footer a{color:#7ff0ff;font-weight:700}
     <h2><span id="rcount">0</span> <span data-i18n="providers" style="color:var(--ink)">مقدم خدمة</span></h2>
   </div>
   <div class="grid" id="grid"></div>
-  <div class="sentinel" id="sentinel"></div>
+  <div class="pager" id="pager"></div>
+  <div class="rinfo" id="rinfo"></div>
 </div>
 
 <footer>
@@ -320,7 +330,7 @@ const I18N={
   ar:{brandSub:"الشبكة الطبية · مصر",eyebrow:"شبكة معتمدة ومحدثة · يناير 2026",heroTitle:'ابحث عن أقرب <span class="hl">مقدم خدمة طبية</span><br>في شبكة MetLife',heroSub:"مستشفيات، أطباء، صيدليات، معامل تحاليل، مراكز أشعة، أسنان، بصريات وأكثر — بنفس فلترة الشيت الرسمي وأدق.",searchPh:"ابحث بالاسم، العنوان، المدينة أو رقم التليفون...",searchBtn:"بحث",searchIn:"بحث...",fGov:"المحافظة",fCity:"المدينة / المنطقة",fType:"نوع مقدم الخدمة",fSpec:"التخصص",fCard:"نوع الكارت",allGov:"كل المحافظات",allCity:"كل المدن",allType:"كل الأنواع",allSpec:"كل التخصصات",allCard:"كل الكروت",reset:"مسح الكل",providers:"مقدم خدمة",call:"اتصال",directions:"الاتجاهات",noSpec:"بدون تخصص محدد",db:"دفع مباشر",empty:"لا توجد نتائج مطابقة",emptySub:"جرّب تعديل الفلاتر أو مسحها",loadmore:"عرض المزيد",footNote:"هذه الأداة لتسهيل البحث في الشبكة الطبية. برجاء التأكد من سريان التعاقد قبل الزيارة.",providersN:"مقدمي خدمة",gov:"محافظة",spec:"تخصص",total:"إجمالي مقدمي الخدمة",madeBy:"صُنع بواسطة",devTitle:"مطوّر برمجيات",rights:"© 2026 Amr Mohamed — جميع الحقوق محفوظة",copied:"تم النسخ"},
   en:{brandSub:"Medical Network · Egypt",eyebrow:"Verified & updated network · Jan 2026",heroTitle:'Find your nearest <span class="hl">medical provider</span><br>in the MetLife network',heroSub:"Hospitals, physicians, pharmacies, labs, radiology, dental, optics and more — the exact official-sheet filtering, only sharper.",searchPh:"Search by name, address, city or phone number...",searchBtn:"Search",searchIn:"Search...",fGov:"Governorate",fCity:"City / Area",fType:"Provider type",fSpec:"Specialty",fCard:"Card tier",allGov:"All governorates",allCity:"All cities",allType:"All types",allSpec:"All specialties",allCard:"All cards",reset:"Clear all",providers:"providers",call:"Call",directions:"Directions",noSpec:"No specific specialty",db:"Direct billing",empty:"No matching results",emptySub:"Try adjusting or clearing the filters",loadmore:"Load more",footNote:"This tool helps you search the medical network. Please confirm the contract is active before visiting.",providersN:"providers",gov:"governorate",spec:"specialty",total:"total providers",madeBy:"Made by",devTitle:"Software Developer",rights:"© 2026 Amr Mohamed — All rights reserved",copied:"Copied"}
 };
-let LANG = localStorage.getItem('met_lang') || 'ar';
+let LANG = localStorage.getItem('met_lang') || 'en';
 
 /* ---------- icons per type ---------- */
 const T_ICON={
@@ -341,7 +351,7 @@ const DIRECT_BILLING=new Set(["Optics Center","Dentist"]);
 
 /* ---------- state ---------- */
 const F={gov:"",city:"",type:"",spec:"",card:"",q:""};
-let filtered=[], shown=0; const PAGE=48;
+let filtered=[], page=1; const PAGE=24;
 
 /* helpers */
 const L=k=>I18N[LANG][k];
@@ -362,11 +372,10 @@ function passExcept(r,skip){
   if(skip!=="q"&&F.q){const n=norm(r.na+' '+r.ne+' '+r.aa+' '+r.ae+' '+r.ca+' '+r.ce+' '+r.ga+' '+r.ge+' '+(r.p||[]).join(' '));if(!F.q.split(' ').every(w=>n.includes(w)))return false;}
   return true;
 }
-function apply(){
+function apply(reset){
   filtered=ROWS.filter(r=>passExcept(r,null));
-  shown=0;
-  document.getElementById('grid').innerHTML='';
-  renderMore();
+  if(reset!==false)page=1;
+  renderPage();
   document.getElementById('rcount').textContent=filtered.length.toLocaleString(isAr()?'ar-EG':'en');
   buildTags();
   rebuildAllPops();
@@ -409,18 +418,39 @@ function cardHTML(r,i){
     </div>
   </article>`;
 }
-function renderMore(){
+function renderPage(){
   const g=document.getElementById('grid');
-  if(shown===0&&filtered.length===0){
+  const pager=document.getElementById('pager'),info=document.getElementById('rinfo');
+  if(filtered.length===0){
     g.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><h3>${L('empty')}</h3><p>${L('emptySub')}</p></div>`;
-    return;
+    pager.innerHTML='';info.textContent='';return;
   }
-  const slice=filtered.slice(shown,shown+PAGE);
-  const frag=document.createElement('div');
-  frag.innerHTML=slice.map((r,i)=>cardHTML(r,i)).join('');
-  while(frag.firstChild)g.appendChild(frag.firstChild);
-  shown+=slice.length;
+  const pages=Math.ceil(filtered.length/PAGE);
+  if(page>pages)page=pages;if(page<1)page=1;
+  const start=(page-1)*PAGE, slice=filtered.slice(start,start+PAGE);
+  g.innerHTML=slice.map((r,i)=>cardHTML(r,i)).join('');
+  // pager
+  const N=(n)=>n.toLocaleString(isAr()?'ar-EG':'en');
+  let btns='';
+  const rtl=isAr();
+  const chevR='<svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const chevL='<svg viewBox="0 0 24 24" fill="none"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const prevArrow=rtl?chevR:chevL, nextArrow=rtl?chevL:chevR;
+  btns+=`<button class="nav" data-p="${page-1}" ${page===1?'disabled':''} aria-label="prev">${prevArrow}</button>`;
+  const set=new Set([1,2,pages-1,pages,page-1,page,page+1]);
+  let prev=0;
+  for(let i=1;i<=pages;i++){
+    if(!set.has(i)){continue;}
+    if(i-prev>1)btns+='<span class="dots">…</span>';
+    btns+=`<button class="${i===page?'on':''}" data-p="${i}">${N(i)}</button>`;
+    prev=i;
+  }
+  btns+=`<button class="nav" data-p="${page+1}" ${page===pages?'disabled':''} aria-label="next">${nextArrow}</button>`;
+  pager.innerHTML=pages>1?btns:'';
+  const from=N(start+1), to=N(start+slice.length), tot=N(filtered.length);
+  info.textContent=isAr()?`عرض ${from}–${to} من ${tot}`:`Showing ${from}–${to} of ${tot}`;
 }
+function goPage(p){page=p;renderPage();document.querySelector('.results').scrollIntoView({behavior:'smooth',block:'start'});}
 
 /* ---------- custom dropdowns ---------- */
 function optionsFor(key){
@@ -532,8 +562,8 @@ document.getElementById('themeBtn').addEventListener('click',()=>setTheme(docume
 /* copy email */
 document.getElementById('mailCopy').addEventListener('click',function(){const b=this;navigator.clipboard.writeText(b.dataset.c).then(()=>{b.classList.add('done');setTimeout(()=>b.classList.remove('done'),1400);});});
 
-/* infinite scroll */
-new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting&&shown<filtered.length)renderMore();});},{rootMargin:'600px'}).observe(document.getElementById('sentinel'));
+/* pagination clicks */
+document.getElementById('pager').addEventListener('click',e=>{const b=e.target.closest('button[data-p]');if(!b||b.disabled)return;goPage(parseInt(b.dataset.p,10));});
 
 /* sticky + totop */
 const fb=document.getElementById('filterBar'),tt=document.getElementById('totop');
